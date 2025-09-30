@@ -30,4 +30,13 @@ public partial class ToolboxFunc
         // ---
         return input.Substring(indexSubMin_, indexSubMax_);  // Returns desired string subsection
     }
+
+
+    /// <summary>
+    /// Determines whether given string value is numeric
+    /// </summary>
+    internal static bool IsNumeric(string value)
+    {
+        return int.TryParse(value, out _);
+    }
 }
