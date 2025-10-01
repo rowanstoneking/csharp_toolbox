@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Diagnostics.Metrics;
+using System.Threading;
 
 namespace CSharpToolbox;
 
@@ -95,6 +96,75 @@ public partial class ToolboxFunc
         }
         // ---
         return result;  // Returns string between head and tail
+    }
+
+
+    /// <summary>
+    /// Replaces ONE find string with a replace string, at the given number of find string from the start
+    /// FUNCTIONS REQUIRED:  GetStrSect
+    /// </summary>
+    /// <param name="src"> Source string </param>
+    /// <param name="find"> String to find </param>
+    /// <param name="replace"> String to replace with </param>
+    /// <param name="instanceNum"> Instance of find string to replace </param>
+    /// <returns> Modified string </returns>
+    internal static string FindReplaceNthSubstr(string src, string find, string replace, int instanceNum)
+    {
+        if ((src.Length < 1) || (find.Length < 1) || (instanceNum == 0)) { return src; }  // If source empty, find string empty, or instance number 0, returns source string.
+        // ---
+        int indexSrc, instanceNumCurr, indexIncrement, instanceIncrement;
+        
+        int srcLen = src.Length;
+        int findLen = find.Length;
+        // ---
+        if (instanceNum > 0)  // Looking forward in source string.
+        {
+            indexSrc = 0;  // index in source string
+            instanceNumCurr = 1;  // current instance number of find string
+            indexIncrement = findLen;  // increment for source index to search at
+            instanceIncrement = 1;  // increment for instance of find string
+        }
+        else  // Looking backward in source string.
+        {
+            indexSrc = srcLen - 1;  // index in source string (end)
+            instanceNumCurr = -1;  // current instance number of find string 
+            indexIncrement = -1;  // increment for source index to search at
+            instanceIncrement = -1;  // increment for instance of find string
+        }
+        // ---
+        // Searches for instance to replace while:  1) searching, 2) remaining material in source string, and 3) haven't gone past the target instance number
+        bool searching = true;
+        int indexFound = -1;
+        string result = null;
+        while (searching && (indexSrc <= srcLen) && (instanceNumCurr <= instanceNum))
+        {
+            indexSrc = src.IndexOf(find, indexSrc);  // Index of current find string instance
+
+            if (indexSrc < 0)
+            {
+                // No find strings left in source, quits searching.
+                result = src;
+                searching = false;
+            }
+            else if (instanceNumCurr == instanceNum)
+            {
+                // Replaces this find string
+                string before = GetStrSect(src, null, (indexSrc - 1), true);
+                string after = GetStrSect(src, (indexSrc + findLen), null, true);
+                result = before + replace + after;
+                indexFound = indexSrc;
+            }
+            else
+            {
+                // This find string is not the instance we need to replace
+                indexSrc += indexIncrement;  // New index in source = just past this instance of find string.
+                instanceNumCurr += instanceIncrement;  // Increments instance of find string.
+            }
+        }
+        // ---
+        if (indexFound == -1) { result = src; }  // If appropriate instance not found, will return source string.
+        // ---
+        return result;
     }
 
 
