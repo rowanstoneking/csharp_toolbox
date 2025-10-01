@@ -1,4 +1,6 @@
-﻿namespace CSharpToolbox;
+﻿using System.Threading;
+
+namespace CSharpToolbox;
 
 public partial class ToolboxFunc
 {
@@ -20,8 +22,86 @@ public partial class ToolboxFunc
     }
 
 
+
+
     /// <summary>
-    /// Gets portion of string from original
+    /// Extracts substring between head string and tail string; if indicated, will delete 1+ sections of source string.
+    /// FUNCTIONS REQUIRED:  DeleteSubStrByIndex, GetStrSect
+    /// </summary>
+    /// <param name="src"> Given string </param>
+    /// <param name="head"> First delimiter string (before string being extracted); if empty or not found, position is considered before source string </param>
+    /// <param name="tail"> Second delimiter string (after string being extracted); if empty or not found, position is considered after source string </param>
+    /// <param name="deleteExtracted"> Whether to delete the string between the head and tail in the original source string </param>
+    /// <param name="deleteBeforeHead"> Whether to delete before the head in the original source string </param>
+    /// <param name="deleteHead"> Whether to delete the head in the original source string</param>
+    /// <param name="deleteTail"> Whether to delete the tail in the original source string </param>
+    /// <param name="deleteAfterTail"> Whether to delete after the tail in the original source string </param>
+    /// <returns> Portion of original string between tail and head </returns>
+    internal static string ExtractBtwnStrings(ref string src, string head, string tail,
+        bool deleteExtracted = false, bool deleteBeforeHead = false, bool deleteHead = false, bool deleteTail = false, bool deleteAfterTail = false)
+    {
+        int headStart, headEnd, tailStart, tailEnd;
+        string result;
+        const int indexBeforeStr = -1;  // Value for index before start of string (not a valid index, but distinct from after the end of a string).
+        // ---
+        if (src.Length < 1) { return String.Empty; }  // If source string is empty, returns empty string
+        // ---
+        // Finds start/end position of head string.
+        if (head.Length > 0)
+        {
+            headStart = src.IndexOf(head);  // start of head
+            if (headStart >= 0) { headEnd = headStart + head.Length - 1; }  // head found, calculates end of head 
+            else { headStart = headEnd = indexBeforeStr; }  // head not found 
+        }
+        else  // empty head, position considered before src
+        {
+            headStart = headEnd = indexBeforeStr;
+        }
+        // ---
+        // Finds start/end position of tail string.
+        if (tail.Length > 0)
+        {
+            tailStart = src.IndexOf(tail);  // start of tail
+            if (tailStart >= 0) { tailEnd = tailStart + tail.Length - 1; }  // tail found, calculates end of tail
+            else { tailStart = tailEnd = tail.Length; }  // tail not found
+        }
+        else  // empty tail, position considered after src
+        {
+            tailStart = tailEnd = tail.Length;
+        }
+        // ---
+        // Gets string between head and tail
+        result = GetStrSect(src, headEnd, tailStart, false);
+        // ---
+        // Deletes all specified items from source string (checks whether they exist first).
+        // NOTE:  deletes in backwards order so we can reference indices.
+        if (deleteAfterTail)
+        {
+            if ((src.Length - 1) > tailEnd) { DeleteSubStrByIndex(ref src, (tailStart + 1), (src.Length - 1)); }
+        }
+        if (deleteTail)
+        {
+            if (tailStart < src.Length) { DeleteSubStrByIndex(ref src, tailStart, tailEnd); }
+        }
+        if (deleteExtracted)
+        {
+            if (result.Length > 0) { DeleteSubStrByIndex(ref src, (headEnd + 1), (tailStart - 1)); }
+        }
+        if (deleteHead)
+        {
+            if (headStart > indexBeforeStr) { DeleteSubStrByIndex(ref src, headStart, headEnd); }
+        }
+        if (deleteBeforeHead)
+        {
+            if (headStart > 0) { DeleteSubStrByIndex(ref src, 0, (headStart + 1)); }
+        }
+        // ---
+        return result;  // Returns string between head and tail
+    }
+
+
+    /// <summary>
+    /// Gets portion of string from original.
     /// </summary>
     /// <param name="input"> Given string </param>
     /// <param name="indexSubMin"> First index of subsection to be retrieved; assumed to be first of original if null </param>
