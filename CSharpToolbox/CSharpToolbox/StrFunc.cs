@@ -22,8 +22,6 @@ public partial class ToolboxFunc
     }
 
 
-
-
     /// <summary>
     /// Extracts substring between head string and tail string; if indicated, will delete 1+ sections of source string.
     /// FUNCTIONS REQUIRED:  DeleteSubStrByIndex, GetStrSect
@@ -136,5 +134,33 @@ public partial class ToolboxFunc
     internal static bool IsNumeric(string value)
     {
         return int.TryParse(value, out _);
+    }
+
+
+    /// <summary>
+    /// Removes all instances of a substring from the end of a source string.
+    /// </summary>
+    /// <param name="src"> Given string being updated </param>
+    /// <param name="substrToRemove"> Substring being removed from end </param>
+    internal static void RemoveSubStrFromEnd(ref string src, string substrToRemove)
+    {
+        while (src.EndsWith(substrToRemove))
+        {
+            src = src.Substring(0, src.Length - substrToRemove.Length);
+        }
+    }
+
+
+    /// <summary>
+    /// Removes all instances of a substring from the start of a source string.
+    /// </summary>
+    /// <param name="src"> Given string being updated </param>
+    /// <param name="substrToRemove"> Substring being removed from start </param>
+    internal static void RemoveSubStrFromStart(ref string src, string substrToRemove)
+    {
+        while (src.StartsWith(substrToRemove))
+        {
+            src = src.Substring(substrToRemove.Length);
+        }
     }
 }
